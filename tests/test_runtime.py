@@ -22,7 +22,9 @@ class CommandResolutionTests(unittest.TestCase):
             command.parent.mkdir(parents=True)
             command.write_text("@echo off\n", encoding="utf-8")
 
-            self.assertEqual(resolve_devspace_command(root, os_name="nt"), command)
+            self.assertEqual(
+                resolve_devspace_command(root, os_name="nt"), command.resolve()
+            )
 
     def test_missing_local_dependency_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp_dir:

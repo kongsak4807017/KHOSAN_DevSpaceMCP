@@ -36,7 +36,9 @@ class MaterializeProfileTests(unittest.TestCase):
             auth = json.loads(result.auth_path.read_text(encoding="utf-8"))
             self.assertEqual(config.get("host"), "127.0.0.1")
             self.assertEqual(config.get("port"), 7678)
-            self.assertEqual(config.get("allowedRoots"), [str(root / "workspace")])
+            self.assertEqual(
+                config.get("allowedRoots"), [str((root / "workspace").resolve())]
+            )
             self.assertNotIn("publicBaseUrl", config)
             self.assertEqual(auth, {"ownerToken": "x" * 32})
             self.assertEqual(result.environment["DEVSPACE_CONFIG_DIR"], str(result.config_dir))

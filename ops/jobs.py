@@ -194,6 +194,13 @@ class JobRepository:
             raise JobError(f"unknown job: {job_id}")
         return self._job(row)
 
+    def list(self) -> list[JobRecord]:
+        with self.store.connection() as connection:
+            rows = connection.execute(
+                "SELECT * FROM jobs ORDER BY created_at, job_id"
+            ).fetchall()
+        return [self._job(row) for row in rows]
+
     def enqueue(self, job_id: str) -> JobRecord:
         return self.transition(job_id, JobStatus.QUEUED)
 

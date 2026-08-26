@@ -8,7 +8,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-08-27-multi-workspace-job-orchestration-design.md`
 
-## Implementation checkpoint — 2026-08-27
+## Verified implementation checkpoint — 2026-08-27
 
 Implemented in this branch:
 
@@ -24,16 +24,13 @@ Implemented in this branch:
 - [x] Workspace and Job operator CLI plus PowerShell passthrough wrapper.
 - [x] Cross-client durable-state, recovery, tunnel, and governance documentation.
 - [x] TDD RED runs were observed before production implementations.
-- [x] Code-core Windows CI reached GREEN before final documentation edits.
+- [x] Code-core Windows CI reached GREEN during implementation.
+- [x] Final pre-receipt HEAD `6965b6c7bf19e11024516c020652164a9873369e` passed GitHub Actions run `33004872677`: strict tests GREEN, compile GREEN, critical dependency-audit gate GREEN.
+- [x] Final diff audit at that HEAD contained only source, tests, docs, governance, and operator-wrapper files; no `runtime/`, SQLite database, auth/token/log/tunnel credential, local workspace state, or generated worktree was committed.
 
-Final branch verification still required after the last documentation/governance commit:
+The documentation-only receipt commit that records this checkpoint must itself retain the same CI gates before merge/promotion.
 
-- [ ] Fresh `npm run test:strict` on final HEAD.
-- [ ] Fresh `npm run compile` on final HEAD.
-- [ ] Fresh critical dependency-audit gate on final HEAD.
-- [ ] Verify final diff contains no `runtime/`, SQLite database, local runtime path state, token, auth file, log, tunnel credential, or generated worktree.
-
-Intentionally deferred rather than guessed:
+## Intentionally deferred rather than guessed
 
 - [ ] Concrete coding-agent executor binding (`Codex`, another reviewed executor, or an approved DevSpace-mediated adapter).
 - [ ] Long-running worker service/daemon loop around the implemented `run_once` + lease primitives.
@@ -42,7 +39,7 @@ Intentionally deferred rather than guessed:
 - [ ] MCP-facing orchestration tools for Job/Workspace operations.
 - [ ] Real-host crash/restart soak and autonomous continuation acceptance.
 
-These deferred items are the next execution-adapter/evidence-integration phase. The current implementation must not invent an unrestricted shell executor merely to make the system appear autonomous.
+These are the next execution-adapter/evidence-integration phase. The current implementation must not invent an unrestricted shell executor merely to make the system appear autonomous.
 
 ## Global constraints
 
@@ -131,4 +128,4 @@ Updated:
 - `docs/WORK_STATE_PROTOCOL.md`
 - `AGENTS.md`
 
-Final closeout is gated on fresh final-HEAD CI and changed-file inspection.
+Closeout requires the receipt commit to preserve the same final-head CI and changed-file safety gates before merge or promotion.

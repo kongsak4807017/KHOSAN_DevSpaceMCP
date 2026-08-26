@@ -27,8 +27,10 @@ def endpoint_for_config(config: dict) -> str:
         if parsed.scheme not in {"http", "https"} or not parsed.netloc:
             raise ValueError("publicBaseUrl must be an absolute HTTP(S) URL")
         return f"{base}/mcp"
-    host = str(config.get("host", "127.0.0.1"))
-    port = int(config.get("port", 7676))
+    if "host" not in config or "port" not in config:
+        raise ValueError("endpoint config requires explicit host and port")
+    host = str(config["host"])
+    port = int(config["port"])
     return f"http://{host}:{port}/mcp"
 
 

@@ -1,9 +1,15 @@
 import json
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
-from ops.health import FailureClass, classify_failure, last_openai_request_timestamp
+from ops.health import (
+    FailureClass,
+    classify_failure,
+    fresh_openai_request,
+    last_openai_request_timestamp,
+)
 
 
 class FailureClassifierTests(unittest.TestCase):
@@ -68,6 +74,34 @@ class LogBoundaryTests(unittest.TestCase):
             self.assertEqual(
                 last_openai_request_timestamp(log_path), "2026-08-26T01:02:00Z"
             )
+
+    def test_reports_only_recent_openai_request_as_inbound(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            log_path = Path(temp_dir) / "devspace.log"
+            log_path.write_text(
+                json.dumps(
+                    {
+                        "ts": "2026-08-26T01:02:00Z",
+                        "userAgent": "openai-mcp/1.0.0",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            fresh, timestamp = fresh_openai_request(
+                log_path,
+                now=datetime(2026, 8, 26, 1, 3, 0, tzinfo=timezone.utc),
+                window_seconds=120,
+            )
+            stale, _ = fresh_openai_request(
+                log_path,
+                now=datetime(2026, 8, 26, 2, 0, 0, tzinfo=timezone.utc),
+                window_seconds=120,
+            )
+
+            self.assertTrue(fresh)
+            self.assertFalse(stale)
+            self.assertEqual(timestamp, "2026-08-26T01:02:00Z")
 
 
 if __name__ == "__main__":

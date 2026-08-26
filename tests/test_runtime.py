@@ -51,6 +51,10 @@ class EndpointTests(unittest.TestCase):
             "https://canary.example.test/mcp",
         )
 
+    def test_missing_port_is_rejected_instead_of_targeting_legacy(self):
+        with self.assertRaisesRegex(ValueError, "explicit host and port"):
+            endpoint_for_config({"host": "127.0.0.1"})
+
     def test_child_environment_preserves_path_and_applies_profile_values(self):
         result = build_child_environment(
             {"PATH": "existing", "KEEP": "yes"},

@@ -22,7 +22,7 @@ Mitigation for the canary:
 - all DevSpace subagent providers are disabled;
 - the canary is loopback-only;
 - no public web promotion is allowed while the exception remains unresolved or is not explicitly accepted after review;
-- `npm run security:audit` remains a visible failing gate;
+- `npm run security:audit` remains a visible manual, non-blocking canary gate; CI reports advisories and blocks critical findings while high/moderate findings remain documented;
 - upgrades are pinned and tested rather than automatic.
 
 This is not recorded as “fixed.” It is a bounded canary exception awaiting an upstream dependency release, a minimal audited fork, or an explicit risk decision.

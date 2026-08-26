@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from enum import StrEnum
 from pathlib import Path
 
@@ -51,3 +52,25 @@ def last_openai_request_timestamp(log_path: Path) -> str | None:
             ):
                 latest = event["ts"]
     return latest
+
+
+def fresh_openai_request(
+    log_path: Path,
+    *,
+    now: datetime | None = None,
+    window_seconds: int = 120,
+) -> tuple[bool, str | None]:
+    if window_seconds < 1:
+        raise ValueError("window_seconds must be positive")
+    timestamp = last_openai_request_timestamp(log_path)
+    if timestamp is None:
+        return False, None
+    try:
+        observed = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+    except ValueError:
+        return False, timestamp
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        raise ValueError("now must be timezone-aware")
+    age = (current - observed).total_seconds()
+    return 0 <= age <= window_seconds, timestamp

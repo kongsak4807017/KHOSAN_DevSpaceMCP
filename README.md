@@ -39,6 +39,7 @@ npm run compile
 ./scripts/ops.ps1 doctor local
 ./scripts/ops.ps1 start local
 ./scripts/ops.ps1 status local
+./scripts/ops.ps1 classify local --forbidden
 ```
 
 `start` owns a profile lock, restarts failed child processes with capped exponential backoff, opens a circuit after repeated crashes, and writes rotating logs under the ignored `runtime/` directory.

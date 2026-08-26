@@ -6,6 +6,7 @@ import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
+from .health import classify_failure, fresh_openai_request
 from .profiles import materialize_profile
 from .runtime import (
     build_child_environment,
@@ -22,6 +23,12 @@ def _parser() -> argparse.ArgumentParser:
     for command in ("materialize", "status", "doctor", "start"):
         child = subcommands.add_parser(command)
         child.add_argument("profile")
+    classify = subcommands.add_parser("classify")
+    classify.add_argument("profile")
+    classify.add_argument("--forbidden", action="store_true")
+    classify.add_argument("--auth-error", action="store_true")
+    classify.add_argument("--tool-call-started", action="store_true")
+    classify.add_argument("--window-seconds", type=int, default=120)
     return parser
 
 
@@ -58,6 +65,36 @@ def run_cli(
         payload["ready"] = bool(check(payload["endpoint"]))
         stdout.write(json.dumps(payload, indent=2) + "\n")
         return 0 if payload["ready"] else 1
+
+    if args.command == "classify":
+        local_endpoint = endpoint_for_config(
+            {"host": _config["host"], "port": _config["port"]}
+        )
+        inbound_seen, last_request = fresh_openai_request(
+            root / "runtime" / args.profile / "logs" / "devspace.log",
+            window_seconds=args.window_seconds,
+        )
+        local_ready = bool(check(local_endpoint))
+        public_ready = bool(check(payload["endpoint"]))
+        failure_class = classify_failure(
+            forbidden=args.forbidden,
+            inbound_request_seen=inbound_seen,
+            local_ready=local_ready,
+            public_ready=public_ready,
+            auth_error=args.auth_error,
+            tool_call_started=args.tool_call_started,
+        )
+        payload.update(
+            {
+                "failureClass": failure_class.value,
+                "inboundRequestSeen": inbound_seen,
+                "lastOpenaiRequest": last_request,
+                "localReady": local_ready,
+                "publicReady": public_ready,
+            }
+        )
+        stdout.write(json.dumps(payload, indent=2) + "\n")
+        return 0
 
     command = resolve_devspace_command(root)
     environment = build_child_environment(dict(os.environ), materialized.environment)

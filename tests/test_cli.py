@@ -74,6 +74,24 @@ class CliTests(unittest.TestCase):
             self.assertEqual(result, 0)
             self.assertTrue(payload["ready"])
 
+    def test_classify_exposes_forbidden_without_request_as_host_capability(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = self._profile_root(temp_dir)
+            output = io.StringIO()
+
+            result = run_cli(
+                ["classify", "local", "--forbidden"],
+                repo_root=root,
+                stdout=output,
+                ready_check=lambda _url: True,
+            )
+
+            payload = json.loads(output.getvalue())
+            self.assertEqual(result, 0)
+            self.assertEqual(payload["failureClass"], "host_capability")
+            self.assertFalse(payload["inboundRequestSeen"])
+            self.assertNotIn("ownerToken", payload)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
 
+from .state import StateStore
+from .workspaces import WorkspaceRegistry
+
 
 class ProfileError(ValueError):
     pass
@@ -56,7 +59,9 @@ def _validate_allowed_roots(values: object) -> list[str]:
         resolved = Path(value).expanduser().resolve()
         if resolved == Path(resolved.anchor) or resolved in forbidden_roots:
             raise ProfileError(f"broad root is not allowed: {resolved}")
-        normalized.append(str(resolved))
+        canonical = str(resolved)
+        if canonical not in normalized:
+            normalized.append(canonical)
     return normalized
 
 
@@ -108,7 +113,7 @@ def materialize_profile(
 
     port = _validated_port(profile.get("port"))
     _validate_unique_port(root, name, port)
-    allowed_roots = _validate_allowed_roots(profile.get("allowedRoots"))
+    base_allowed_roots = _validate_allowed_roots(profile.get("allowedRoots"))
     public_base_url = _validate_public_base_url(name, profile.get("publicBaseUrl"))
     runtime = root / "runtime" / name
     config_dir = runtime / "config"
@@ -118,7 +123,14 @@ def materialize_profile(
     for directory in (config_dir, state_dir, worktree_dir, log_dir):
         directory.mkdir(parents=True, exist_ok=True)
 
-    config_dir.mkdir(parents=True, exist_ok=True)
+    orchestration_store = StateStore(state_dir / "khosan.db")
+    orchestration_store.initialize()
+    registered_roots = [
+        record.root_path
+        for record in WorkspaceRegistry(orchestration_store).list(include_disabled=False)
+    ]
+    allowed_roots = _validate_allowed_roots(base_allowed_roots + registered_roots)
+
     config_path = config_dir / "config.json"
     auth_path = config_dir / "auth.json"
     config = {

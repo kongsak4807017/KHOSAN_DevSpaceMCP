@@ -1,0 +1,24 @@
+{
+  "name": "khosan-devspace-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "KHOSAN_DevSpace: a versioned dual-profile runtime wrapper for DevSpace MCP.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kongsak4807017/KHOSAN_DevSpaceMCP.git"
+  },
+  "engines": {
+    "node": ">=22.19 <27"
+  },
+  "scripts": {
+    "devspace:doctor": "devspace doctor",
+    "ops": "python -m ops.cli",
+    "test": "python -m unittest discover -s tests -v",
+    "test:strict": "python -W error::ResourceWarning -m unittest discover -s tests -v",
+    "compile": "python -m compileall -q ops tests",
+    "security:audit": "npm audit --audit-level=high"
+  },
+  "dependencies": {
+    "@waishnav/devspace": "1.0.8"
+  }
+}

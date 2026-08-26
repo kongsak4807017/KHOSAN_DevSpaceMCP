@@ -1,0 +1,13 @@
+{
+  "name": "web",
+  "port": 7677,
+  "publicBaseUrl": "https://replace-with-a-stable-canary-domain.example",
+  "allowedRoots": [
+    "C:\\RO-WEB-V1",
+    "C:\\ROREBUILD"
+  ],
+  "toolMode": "minimal",
+  "widgets": "changes",
+  "skillsEnabled": true,
+  "subagentsEnabled": false
+}

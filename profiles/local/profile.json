@@ -1,0 +1,12 @@
+{
+  "name": "local",
+  "port": 7678,
+  "allowedRoots": [
+    "C:\\RO-WEB-V1",
+    "C:\\ROREBUILD"
+  ],
+  "toolMode": "minimal",
+  "widgets": "changes",
+  "skillsEnabled": true,
+  "subagentsEnabled": false
+}
